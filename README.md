@@ -1,5 +1,11 @@
 # Nixie Clock v1
 
+## Schematic
+[Schematic_Nixie_clock_v1.pdf](https://github.com/jordanpenard/NixieClock/raw/main/Schematic_Nixie_clock_v1.pdf)
+
+## Gerber
+[Gerber_Nixie_clock_v1.zip](https://github.com/jordanpenard/NixieClock/raw/main/Gerber_Nixie_clock_v1.zip)
+
 ## BOM
 |Name                             |Designator |Footprint                        |Quantity|
 |---------------------------------|-----------|---------------------------------|--------|
@@ -10,3 +16,6 @@
 |74HC595                          |U5,U6      |DIP16                            |2       |
 |WEMOS D1 MINI                    |U7         |WEMOS D1 MINI                    |1       |
 |High voltage supply by valentinas|U8         |HIGH VOLTAGE SUPPLY BY VALENTINAS|1       |
+
+## Firmware
+On the software side, the only thing that needs doing is setting your WIFI SSID and password in `define.h`
