@@ -1,5 +1,8 @@
 # Nixie Clock v1
 
+The hardware was designed with EasyEda and is accessible here : https://oshwlab.com/jordan038/nixie-clock
+The software was coded on the Arduino IDE
+
 ## Schematic
 [Schematic_Nixie_clock_v1.pdf](https://github.com/jordanpenard/NixieClock/raw/main/Schematic_Nixie_clock_v1.pdf)
 
@@ -18,4 +21,10 @@
 |High voltage supply by valentinas|U8         |HIGH VOLTAGE SUPPLY BY VALENTINAS|1       |
 
 ## Firmware
-On the software side, the only thing that needs doing is setting your WIFI SSID and password in `define.h`
+Required libraries :
+- NTPClient by Fabrice Weinberg
+
+Required board :
+- esp8266 (https://arduino.esp8266.com/stable/package_esp8266com_index.json)
+
+You will need to set your WIFI SSID and password in `define.h`
