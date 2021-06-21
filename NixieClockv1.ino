@@ -24,8 +24,6 @@ void setup() {
   digitalWrite(ShiftIn, LOW);  
   digitalWrite(Latch, LOW);  
   digitalWrite(Clear, HIGH);  
-
-  get_internet_time();
 }
 
 void get_internet_time() {
@@ -67,11 +65,6 @@ void get_internet_time() {
   delay(1); //For some reason the modem won't go to sleep unless you do a delay
 }
 
-void callback() {
-  Serial.println("Waking up from light sleep");
-  Serial.flush();
-}
-
 void display(uint8_t char3, uint8_t char2, uint8_t char1, uint8_t char0) {
   const uint16_t buff = ((char3 & 0xF) << 12) | ((char2 & 0xF) << 8) | ((char1 & 0xF) << 4) | (char0 & 0xF);
 
@@ -92,37 +85,28 @@ void display(uint8_t char3, uint8_t char2, uint8_t char1, uint8_t char0) {
   digitalWrite(Latch, HIGH);
 }
 
-void light_sleep(uint32_t sleep_time_in_ms) {
-  wifi_set_opmode(NULL_MODE);
-  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
-  wifi_fpm_open();
-  wifi_fpm_set_wakeup_cb(callback);
-  wifi_fpm_do_sleep(sleep_time_in_ms *1000 );
-  delay(sleep_time_in_ms + 1);
-}
-
 void loop() {
 
-  // Display the time on the Nixie tubes
-  display(hours/10, hours%10, minutes/10, minutes%10);
-
-  // We don't actualy keep track of seconds as we sleep for 1 minute, 
-  //  but after we get the time from the internet we wait for the remaining 
-  //  time until the next minute
-  if (seconds != 0) {
-    light_sleep((60-seconds)*1000);
-    seconds = 0;
-  } else
-    light_sleep(60000);
-
-  // Add 1 minute to the clock
-  if (minutes >= 59) {
-    if (hours >= 23) {
-      hours = 0;
-      get_internet_time();
+  if (hours == 0 && minutes == 0 && seconds == 0) {
+    get_internet_time();
+    display(hours/10, hours%10, minutes/10, minutes%10);
+  } else {
+    // Add 1 second to the clock
+    if (seconds >= 59) {
+      if (minutes >= 59) {
+        if (hours >= 23) {
+          hours = 0;
+        } else
+          hours++;
+        minutes = 0;
+      } else
+        minutes++;
+      seconds = 0;
+      display(hours/10, hours%10, minutes/10, minutes%10);
     } else
-      hours++;
-    minutes = 0;
-  } else
-    minutes++;
+      seconds++;
+  }
+  
+  delay(1000);
+
 }
