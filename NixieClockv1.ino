@@ -6,9 +6,10 @@
 #include <WiFiUdp.h>
 
 
-uint8_t hours = 0;
+uint8_t hours = 2;
 uint8_t minutes = 0;
 uint8_t seconds = 0;
+bool is_dst = false;
 
 void setup() {
   Serial.begin(115200);
@@ -30,11 +31,11 @@ void get_internet_time() {
 
   // Define NTP Client to get time
   WiFiUDP ntpUDP;
-  NTPClient timeClient(ntpUDP, "pool.ntp.org", 3600);
+  NTPClient timeClient(ntpUDP, "pool.ntp.org", 0);
   
   // Turn modem on
   WiFi.forceSleepWake();
-  delay(1);
+  delay(100);
 
   // Connect to WIFI
   WiFi.mode(WIFI_STA);
@@ -55,9 +56,32 @@ void get_internet_time() {
   // Get time
   timeClient.begin();
   timeClient.update();
-  hours = timeClient.getHours();
-  minutes = timeClient.getMinutes();
-  seconds = timeClient.getSeconds();
+
+  // Get a time structure
+  time_t epochTime = timeClient.getEpochTime();
+  struct tm *ptm = gmtime((time_t *)&epochTime);
+  hours = ptm->tm_hour;
+  minutes = ptm->tm_min;
+  seconds = ptm->tm_sec;
+
+  // Compute DST
+  //  DST (GMT+1 durring summer time) starts on the last Sunday of March and ends on the last Sunday of October
+  // True conditions :
+  //  April to Sept
+  //  March and (mday-wday)>=25
+  //  October and (mday-wday)<25
+  if( ( (ptm->tm_mon > 2) && (ptm->tm_mon < 9) )
+   || ( (ptm->tm_mon == 2) && ((ptm->tm_mday - ptm->tm_wday) >= 25) )
+   || ( (ptm->tm_mon == 9) && ((ptm->tm_mday - ptm->tm_wday) < 25) ) )
+    is_dst = true;
+  else
+    is_dst = false;
+
+  Serial.println((String)"Internet time : " + hours + (String)":" + minutes + (String)":" + seconds);
+  Serial.println((String)"DST : " + is_dst);
+  Serial.println((String)"tm_mon : " + ptm->tm_mon);
+  Serial.println((String)"tm_mday : " + ptm->tm_mday);
+  Serial.println((String)"tm_wday : " + ptm->tm_wday);
 
   // Turn modem off
   WiFi.disconnect();
@@ -65,7 +89,16 @@ void get_internet_time() {
   delay(1); //For some reason the modem won't go to sleep unless you do a delay
 }
 
-void display(uint8_t char3, uint8_t char2, uint8_t char1, uint8_t char0) {
+void display() {
+  uint8_t adjusted_hours = hours;
+  if(is_dst) {
+    adjusted_hours++;
+  }
+  
+  const uint8_t char3 = adjusted_hours/10;
+  const uint8_t char2 = adjusted_hours%10;
+  const uint8_t char1 = minutes/10;
+  const uint8_t char0 = minutes%10;
   const uint16_t buff = ((char3 & 0xF) << 12) | ((char2 & 0xF) << 8) | ((char1 & 0xF) << 4) | (char0 & 0xF);
 
   // Value to send to the shift registers
@@ -87,9 +120,9 @@ void display(uint8_t char3, uint8_t char2, uint8_t char1, uint8_t char0) {
 
 void loop() {
 
-  if (hours == 0 && minutes == 0 && seconds == 0) {
+  if (hours == 2 && minutes == 0 && seconds == 0) {
     get_internet_time();
-    display(hours/10, hours%10, minutes/10, minutes%10);
+    display();
   } else {
     // Add 1 second to the clock
     if (seconds >= 59) {
@@ -102,7 +135,7 @@ void loop() {
       } else
         minutes++;
       seconds = 0;
-      display(hours/10, hours%10, minutes/10, minutes%10);
+      display();
     } else
       seconds++;
   }
