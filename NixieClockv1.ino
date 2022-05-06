@@ -73,7 +73,10 @@ void get_internet_time() {
   if( ( (ptm->tm_mon > 2) && (ptm->tm_mon < 9) )
    || ( (ptm->tm_mon == 2) && ((ptm->tm_mday - ptm->tm_wday) >= 25) )
    || ( (ptm->tm_mon == 9) && ((ptm->tm_mday - ptm->tm_wday) < 25) ) )
+  {
+    hours++;
     is_dst = true;
+  }
   else
     is_dst = false;
 
@@ -90,13 +93,8 @@ void get_internet_time() {
 }
 
 void display() {
-  uint8_t adjusted_hours = hours;
-  if(is_dst) {
-    adjusted_hours++;
-  }
-  
-  const uint8_t char3 = adjusted_hours/10;
-  const uint8_t char2 = adjusted_hours%10;
+  const uint8_t char3 = hours/10;
+  const uint8_t char2 = hours%10;
   const uint8_t char1 = minutes/10;
   const uint8_t char0 = minutes%10;
   const uint16_t buff = ((char3 & 0xF) << 12) | ((char2 & 0xF) << 8) | ((char1 & 0xF) << 4) | (char0 & 0xF);
