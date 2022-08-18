@@ -1,5 +1,7 @@
 # Nixie Clock v1
 
+![The clock](https://github.com/jordanpenard/NixieClock/raw/main/PXL_20220818_160243123.jpg)
+
 The hardware was designed with EasyEda and is accessible here : https://oshwlab.com/jordan038/nixie-clock
 
 The software was coded on the Arduino IDE and is available in this repo.
