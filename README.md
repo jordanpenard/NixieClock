@@ -1,7 +1,9 @@
 # Nixie Clock v1
 
 The hardware was designed with EasyEda and is accessible here : https://oshwlab.com/jordan038/nixie-clock
+
 The software was coded on the Arduino IDE and is available in this repo.
+
 The 3D printed case was designed in OnShape and is accessible here : https://cad.onshape.com/documents/f923ccf06895d8b9759a02be/w/6e75daf2f2eb973f4217d7dc/e/3933878daeafba718c4affce
 
 ## Schematic
