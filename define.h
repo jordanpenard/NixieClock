@@ -6,6 +6,3 @@
 #define Clear    D7
 
 #define SHIFT_HALF_PERIOD_US 1
-
-const char* ssid = "<SSID>";
-const char* password = "<WIFI Password>";
