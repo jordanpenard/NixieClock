@@ -1,13 +1,17 @@
 # Nixie Clock v1
 
 The hardware was designed with EasyEda and is accessible here : https://oshwlab.com/jordan038/nixie-clock
-The software was coded on the Arduino IDE
+The software was coded on the Arduino IDE and is available in this repo.
+The 3D printed case was designed in OnShape and is accessible here : https://cad.onshape.com/documents/f923ccf06895d8b9759a02be/w/6e75daf2f2eb973f4217d7dc/e/3933878daeafba718c4affce
 
 ## Schematic
 [Schematic_Nixie_clock_v1.pdf](https://github.com/jordanpenard/NixieClock/raw/main/Schematic_Nixie_clock_v1.pdf)
 
 ## Gerber
 [Gerber_Nixie_clock_v1.zip](https://github.com/jordanpenard/NixieClock/raw/main/Gerber_Nixie_clock_v1.zip)
+
+## 3D printed case
+[Case_Nixie_clock_v1](https://www.thingiverse.com/thing:5468544)
 
 ## BOM
 |Name                             |Designator |Footprint                        |Quantity|
@@ -22,9 +26,11 @@ The software was coded on the Arduino IDE
 
 ## Firmware
 Required libraries :
-- NTPClient by Fabrice Weinberg
+- [WiFiConnectLite](https://github.com/mrfaptastic/WiFiConnectLite)
 
 Required board :
 - esp8266 (https://arduino.esp8266.com/stable/package_esp8266com_index.json)
 
-You will need to set your WIFI SSID and password in `define.h`
+On the first boot, the board will create an access point with captive portal for you to setup your WiFi credentials. Those details will be stored on the board's flash and used in the future. If the board is unable to connect to the WiFi you setup, it will bring the access point up again. The access point is named `Arduino-NixieClockV1`.
+The time is gathered from `time.nist.gov`, and will display as GMT+0, and will correct for DST in the summer automatically.
+
