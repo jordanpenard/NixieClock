@@ -1,60 +1,37 @@
 
 #include "define.h"
 #include "Arduino.h"
-#include <WiFiClient.h>
-#include <WiFiConnect.h>
 #include <WiFiUdp.h>
+#include <WiFiManager.h>
 
 
 // -----------
 // WiFi
 
-WiFiConnect wifiConnect;
-WiFiClient wifiClient;
-
-void configModeCallback(WiFiConnect *mWiFiConnect) {
-  Serial.println("Entering Access Point");
-}
+WiFiManager wifiManager;
 
 void connect_to_wifi() {
-  
-  wifiConnect.setDebug(true);
 
-  /* Set our callbacks */
-  wifiConnect.setAPCallback(configModeCallback);
+  wifiManager.autoConnect("Arduino-NixieClockV1");
 
-  //wifiConnect.resetSettings(); //helper to remove the stored wifi connection, comment out after first upload and re upload
-
-    /*
-       AP_NONE = Continue executing code
-       AP_LOOP = Trap in a continuous loop - Device is useless
-       AP_RESET = Restart the chip
-       AP_WAIT  = Trap in a continuous loop with captive portal until we have a working WiFi connection
-    */
-    if (!wifiConnect.autoConnect()) { // try to connect to wifi
-      /* We could also use button etc. to trigger the portal on demand within main loop */
-      wifiConnect.setAPName("Arduino-NixieClockV1");
-      wifiConnect.startConfigurationPortal(AP_WAIT);//if not connected show the configuration portal
-    }
-
-    if (WiFi.status() == WL_IDLE_STATUS)
-      Serial.println("WL_IDLE_STATUS");
-    else if (WiFi.status() == WL_NO_SSID_AVAIL)
-      Serial.println("WL_NO_SSID_AVAIL");
-    else if (WiFi.status() == WL_SCAN_COMPLETED)
-      Serial.println("WL_SCAN_COMPLETED");
-    else if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("WL_CONNECTED");
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
-    } else if (WiFi.status() == WL_CONNECT_FAILED)
-      Serial.println("WL_CONNECT_FAILED");
-    else if (WiFi.status() == WL_CONNECTION_LOST)
-      Serial.println("WL_CONNECTION_LOST");
-    else if (WiFi.status() == WL_DISCONNECTED)
-      Serial.println("WL_DISCONNECTED");
-    else
-      Serial.println("WL_NO_SHIELD");
+  if (WiFi.status() == WL_IDLE_STATUS)
+    Serial.println("WL_IDLE_STATUS");
+  else if (WiFi.status() == WL_NO_SSID_AVAIL)
+    Serial.println("WL_NO_SSID_AVAIL");
+  else if (WiFi.status() == WL_SCAN_COMPLETED)
+    Serial.println("WL_SCAN_COMPLETED");
+  else if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("WL_CONNECTED");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  } else if (WiFi.status() == WL_CONNECT_FAILED)
+    Serial.println("WL_CONNECT_FAILED");
+  else if (WiFi.status() == WL_CONNECTION_LOST)
+    Serial.println("WL_CONNECTION_LOST");
+  else if (WiFi.status() == WL_DISCONNECTED)
+    Serial.println("WL_DISCONNECTED");
+  else
+    Serial.println("WL_NO_SHIELD");
 }
 
 // -----------
@@ -76,10 +53,6 @@ void get_internet_time() {
 
   const int NTP_PACKET_SIZE = 48;  // NTP time stamp is in the first 48 bytes of the message
   byte NTPBuffer[NTP_PACKET_SIZE];     // A buffer to hold incoming and outgoing packets
-
-  // Turn modem on
-  //WiFi.forceSleepWake();
-  //delay(100);
 
   connect_to_wifi();
     
@@ -124,11 +97,10 @@ void get_internet_time() {
   Serial.println((String)"Unix epoch time : " + timeUNIX);
 
   lastNTPResponse = millis();
+  prevNTP = get_unixtimestamp();
 
   // Turn modem off
-  //WiFi.disconnect();
-  //WiFi.forceSleepBegin();
-  //delay(1); //For some reason the modem won't go to sleep unless you do a delay
+  WiFi.mode(WIFI_OFF);
 }
 
 void display() {
@@ -219,7 +191,8 @@ void loop() {
   if (get_unixtimestamp() - prevNTP > intervalNTP) // Request the time from the time server every day
     get_internet_time();
   
-  display();  
-  delay(1000*get_next_minute_change_in_sec());
-
+  display();
+  do {
+    delay(1000);
+  } while (get_next_minute_change_in_sec() != 60);
 }

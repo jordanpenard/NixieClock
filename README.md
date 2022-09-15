@@ -30,7 +30,7 @@ The 3D printed case was designed in OnShape and is accessible here : https://cad
 
 ## Firmware
 Required libraries :
-- [WiFiConnectLite](https://github.com/mrfaptastic/WiFiConnectLite)
+- [WifiManager v0.16.0](https://github.com/tzapu/WiFiManager)
 
 Required board :
 - esp8266 (https://arduino.esp8266.com/stable/package_esp8266com_index.json)
