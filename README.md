@@ -38,3 +38,10 @@ Required board :
 On the first boot, the board will create an access point with captive portal for you to setup your WiFi credentials. Those details will be stored on the board's flash and used in the future. If the board is unable to connect to the WiFi you setup, it will bring the access point up again. The access point is named `Arduino-NixieClockV1`.
 
 The time is gathered from `time.nist.gov`, and will display as GMT+0, and will correct for DST in the summer automatically. The board will keep track of time over the period of a day and will refresh it's time from the time server previously mentioned every 24h.
+
+If the 3 digits on the left are blank, that means the 4th digit is displaying a debug code while the board is booting :
+- 0 : Waiting for WiFi to connect
+- 1 : Time server DNS lookup
+- 2 : Sending NTP request
+- 3 : Waiting for NTP response
+- 4 : Switching WiFi off

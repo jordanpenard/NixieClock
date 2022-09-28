@@ -55,7 +55,9 @@ void get_internet_time() {
   byte NTPBuffer[NTP_PACKET_SIZE];     // A buffer to hold incoming and outgoing packets
 
   connect_to_wifi();
-    
+
+  send_to_display(0xa, 0xa, 0xa, 1);
+
   IPAddress timeServerIP;        // The time.nist.gov NTP server's IP address
   WiFiUDP UDP;                   // Create an instance of the WiFiUDP class to send and receive UDP messages
 
@@ -66,6 +68,8 @@ void get_internet_time() {
     ESP.reset();
   }
 
+  send_to_display(0xa, 0xa, 0xa, 2);
+
   Serial.println((String)"Time server IP : " + timeServerIP.toString());
 
   memset(NTPBuffer, 0, NTP_PACKET_SIZE);  // set all bytes in the buffer to 0
@@ -75,6 +79,9 @@ void get_internet_time() {
   UDP.beginPacket(timeServerIP, 123); // NTP requests are to port 123
   UDP.write(NTPBuffer, NTP_PACKET_SIZE);
   UDP.endPacket();
+
+  send_to_display(0xa, 0xa, 0xa, 3);
+
   int i = 0;
   while (UDP.parsePacket() == 0) {
     if (i > 20)
@@ -99,11 +106,33 @@ void get_internet_time() {
   lastNTPResponse = millis();
   prevNTP = get_unixtimestamp();
 
+  send_to_display(0xa, 0xa, 0xa, 4);
+
   // Turn modem off
   WiFi.mode(WIFI_OFF);
 }
 
-void display() {
+void send_to_display(uint8_t char3, uint8_t char2, uint8_t char1, uint8_t char0) {
+  const uint16_t buff = ((char3 & 0xF) << 12) | ((char2 & 0xF) << 8) | ((char1 & 0xF) << 4) | (char0 & 0xF);
+
+  // Value to send to the shift registers
+  Serial.println(buff, HEX);
+
+  digitalWrite(Latch, LOW);
+
+  // Shift data through
+  for(uint8_t i = 0; i < 16; i++) {
+    digitalWrite(ShiftIn, (buff >> (15-i)) & 0x01);  
+    delayMicroseconds(SHIFT_HALF_PERIOD_US);
+    digitalWrite(ShiftClk, HIGH);  
+    delayMicroseconds(SHIFT_HALF_PERIOD_US);
+    digitalWrite(ShiftClk, LOW);  
+  }
+
+  digitalWrite(Latch, HIGH);  
+}
+
+void refresh_display() {
   uint8_t hours = 2;
   uint8_t minutes = 0;
   uint8_t seconds = 0;
@@ -138,27 +167,7 @@ void display() {
   Serial.println((String)"tm_mday : " + ptm->tm_mday);
   Serial.println((String)"tm_wday : " + ptm->tm_wday);
 
-  const uint8_t char3 = hours/10;
-  const uint8_t char2 = hours%10;
-  const uint8_t char1 = minutes/10;
-  const uint8_t char0 = minutes%10;
-  const uint16_t buff = ((char3 & 0xF) << 12) | ((char2 & 0xF) << 8) | ((char1 & 0xF) << 4) | (char0 & 0xF);
-
-  // Value to send to the shift registers
-  Serial.println(buff, HEX);
-
-  digitalWrite(Latch, LOW);
-
-  // Shift data through
-  for(uint8_t i = 0; i < 16; i++) {
-    digitalWrite(ShiftIn, (buff >> (15-i)) & 0x01);  
-    delayMicroseconds(SHIFT_HALF_PERIOD_US);
-    digitalWrite(ShiftClk, HIGH);  
-    delayMicroseconds(SHIFT_HALF_PERIOD_US);
-    digitalWrite(ShiftClk, LOW);  
-  }
-
-  digitalWrite(Latch, HIGH);
+  send_to_display(hours/10, hours%10, minutes/10, minutes%10);
 }
 
 int get_next_minute_change_in_sec() {
@@ -182,6 +191,8 @@ void setup() {
   digitalWrite(Latch, LOW);  
   digitalWrite(Clear, HIGH);
 
+  send_to_display(0xa, 0xa, 0xa, 0);
+  
   get_internet_time();
 }
 
@@ -189,9 +200,9 @@ void loop() {
 
   // Time to update our internet time
   if (get_unixtimestamp() - prevNTP > intervalNTP) // Request the time from the time server every day
-    get_internet_time();
+    ESP.reset();
   
-  display();
+  refresh_display();
   do {
     delay(1000);
   } while (get_next_minute_change_in_sec() != 60);
