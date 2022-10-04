@@ -12,6 +12,7 @@ WiFiManager wifiManager;
 
 void connect_to_wifi() {
 
+  wifiManager.setConfigPortalTimeout(180); // 3min timeout
   wifiManager.autoConnect("Arduino-NixieClockV1");
 
   if (WiFi.status() == WL_IDLE_STATUS)
@@ -24,6 +25,7 @@ void connect_to_wifi() {
     Serial.println("WL_CONNECTED");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+    return;
   } else if (WiFi.status() == WL_CONNECT_FAILED)
     Serial.println("WL_CONNECT_FAILED");
   else if (WiFi.status() == WL_CONNECTION_LOST)
@@ -32,6 +34,8 @@ void connect_to_wifi() {
     Serial.println("WL_DISCONNECTED");
   else
     Serial.println("WL_NO_SHIELD");
+
+  ESP.reset();
 }
 
 // -----------

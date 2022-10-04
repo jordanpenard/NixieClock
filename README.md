@@ -35,7 +35,7 @@ Required libraries :
 Required board :
 - esp8266 (https://arduino.esp8266.com/stable/package_esp8266com_index.json)
 
-On the first boot, the board will create an access point with captive portal for you to setup your WiFi credentials. Those details will be stored on the board's flash and used in the future. If the board is unable to connect to the WiFi you setup, it will bring the access point up again. The access point is named `Arduino-NixieClockV1`.
+On the first boot, the board will create an access point with captive portal for you to setup your WiFi credentials. Those details will be stored on the board's flash and used in the future. If the board is unable to connect to the WiFi you setup, it will bring the access point up again. The access point is named `Arduino-NixieClockV1` and is open for 3min, after which the board will reset itself.
 
 The time is gathered from `time.nist.gov`, and will display as GMT+0, and will correct for DST in the summer automatically. The board will keep track of time over the period of a day and will refresh it's time from the time server previously mentioned every 24h.
 
